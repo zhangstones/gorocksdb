@@ -1,6 +1,7 @@
 package gorocksdb
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 
@@ -33,14 +34,16 @@ func TestMemoryUsage(t *testing.T) {
 	ro := NewDefaultReadOptions()
 	defer ro.Destroy()
 
-	key := []byte("key")
 	value := make([]byte, 1024)
 	_, err = rand.Read(value)
 	ensure.Nil(t, err)
 
-	err = db.Put(wo, key, value)
-	ensure.Nil(t, err)
-	_, err = db.Get(ro, key)
+	for i := 0; i < 2048; i++ {
+		key := []byte(fmt.Sprintf("key-%04d", i))
+		err = db.Put(wo, key, value)
+		ensure.Nil(t, err)
+	}
+	_, err = db.Get(ro, []byte("key-0000"))
 	ensure.Nil(t, err)
 
 	// take second memory usage snapshot
